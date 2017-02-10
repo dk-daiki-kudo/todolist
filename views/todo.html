@@ -1,0 +1,57 @@
+<div id="container" class="container" style="margin: 40px">
+	<h1>ToDoリスト</h1>
+
+	<form>
+		<div>やること</div>
+		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			<input ng-model="content.title" class="mdl-textfield__input" type="text">
+		</div>
+		<div ng-init="content.state = '着手'"></div>
+		<div>重要度</div>
+		<div style="margin-top: 20px"></div>
+		<label>
+			<input ng-model="content.importance" type="radio" name="radiobutton" value="低">
+			<span >低</span>
+		</label>
+		<label>
+			<input ng-model="content.importance" type="radio" name="radiobutton" value="中">
+			<span >中</span>
+		</label>
+		<label>
+			<input ng-model="content.importance" type="radio" name="radiobutton" value="高">
+			<span >高</span>
+		</label>
+
+		<button style="margin-left: 60px" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" ng-click="create()">やることを追加</button>
+	</form>
+
+	<div style="margin-top: 40px"></div>
+
+	<table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp" >
+		<thead>
+			<tr>
+				<th class="mdl-data-table__cell--non-numeric">やること</th>
+				<th>重要度</th>
+				<th>状態</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="content in contents|orderBy:['-state','-_id']">
+				<td ng-init="content.title=" class="mdl-data-table__cell--non-numeric">{{content.title}}</td>
+				<td>{{content.importance}}</td>
+				<td>{{content.state}}</td>
+				<td> 
+					<div ng-switch="content.state">
+						<span ng-switch-when="完了">
+							<button class="mdl-button mdl-js-button mdl-button--primary" ng-click="delete(content._id)">削除</button>
+						</span>
+						<span ng-switch-when="着手">
+							<button class="mdl-button mdl-js-button mdl-button--primary" ng-click="update(content._id,content.title,content.importance)">終わった</button>
+						</span>	
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

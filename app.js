@@ -1,46 +1,47 @@
 var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var index = require('./routes/index');
-var users = require('./routes/users');
+var mongodb = require('mongodb');
 
 var app = express();
+var contents;
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(express.static('views'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
+//3000番ポートで待つ
+app.listen(3000);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+//connection to database and get database object
+mongodb.MongoClient.connect("mongodb://heroku_d7sb4n2m:3rjg7an14o6kda7dm6d3nr07h1@ds145649.mlab.com:45649/heroku_d7sb4n2m", function(err, database) {
+  contents = database.collection("contents");
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+// get contents
+app.get("/api/contents", function(req, res) {
+  contents.find().toArray(function(err, items) {
+    res.send(items);
+  });
 });
 
-module.exports = app;
+// get content
+app.get("/api/contents/:_id", function(req, res) {
+  contents.findOne({_id: mongodb.ObjectID(req.params._id)}, function(err, item) {
+    res.send(item);
+  });
+});
+
+// saveはキーの有無で挙動が変わる
+app.post("/api/contents", function(req, res) {
+  var content = req.body;
+  if (content._id) content._id = mongodb.ObjectID(content._id);
+  contents.save(content, function() {
+    res.send("insert or update");
+  });
+});
+
+// 削除
+app.delete("/api/contents/:_id", function(req, res) {
+  contents.remove({_id: mongodb.ObjectID(req.params._id)}, function() {
+    res.send("delete");
+  });
+});

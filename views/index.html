@@ -3,12 +3,63 @@
 <meta charset="utf-8">
 
 <title>ToDo</title>
+<div ng-view></div>
+<link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.indigo-pink.min.css">
+<script src="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-<body>
-  
-<h1>Hello!</h1>
-<p>meta</p>
+<script src="//code.angularjs.org/1.3.15/angular.min.js"></script>
+<script src="//code.angularjs.org/1.3.15/angular-resource.min.js"></script>
+<script src="//code.angularjs.org/1.3.15/angular-route.min.js"></script>
+<script>
+  var app = angular.module('app', ['ngResource', 'ngRoute']);
+
+  app.config(function($routeProvider) {
+    $routeProvider.when('/contents', {
+      templateUrl: 'todo.html', controller: 'EditCtrl'
+    }).when('/contents/:_id', {
+      templateUrl: 'edit.html', controller: 'EditCtrl'
+    }).otherwise({
+      redirectTo: '/contents'
+    });
+  });
+
+  app.factory('Content', function($resource) {
+    return $resource('/api/contents/:_id');
+  });
+
+app.controller('ListCtrl', function($scope, $route, Content) {
+  $scope.contents = Content.query();
+  $scope.delete = function(_id) {
+    Content.delete({_id: _id}, function() {
+      $route.reload();
+    });
+  };
+});
+
+app.controller('EditCtrl', function($scope, $route,$routeParams, $location, Content) {
+  $scope.contents = Content.query();
+  $scope.delete = function(_id) {
+    Content.delete({_id: _id}, function() {
+      $route.reload();
+    });
+  };
 
 
-</body>
+  if ($routeParams._id != 'new') $scope.content = Content.get({_id: $routeParams._id});
+  $scope.create = function() {
+    Content.save($scope.content, function() {
+      $location.url('/');
+    });
+  };
+
+  $scope.update=function(_id,title,importance){
+    Content.save({_id:_id,title:title,importance:importance,state:"完了"},function(){
+      $location.url('/');
+    });
+  }
+
+});
+
+</script>
 </html>
