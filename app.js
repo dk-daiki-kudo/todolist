@@ -10,7 +10,6 @@ app.use(express.static('views'));
 app.use(bodyParser.json());
 app.use(helmet());
 
-app.set('view engine', 'html');
 
 //3000番ポートで待つ
 var port = process.env.PORT || 3000;
