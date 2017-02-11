@@ -1,12 +1,16 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongodb = require('mongodb');
+var helmet = require('helmet');
 
 var app = express();
 var contents;
 
 app.use(express.static('views'));
 app.use(bodyParser.json());
+app.use(helmet());
+
+app.set('view engine', 'html');
 
 //3000番ポートで待つ
 var port = process.env.PORT || 3000;
